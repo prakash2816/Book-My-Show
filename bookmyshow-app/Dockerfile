@@ -3,6 +3,9 @@ FROM node:18 AS build
 
 WORKDIR /app
 
+# Fix OpenSSL issue for webpack
+ENV NODE_OPTIONS=--openssl-legacy-provider
+
 COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
 
@@ -13,10 +16,8 @@ RUN npm run build
 # ---------- Runtime stage ----------
 FROM nginx:alpine
 
-# Remove default nginx files
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy build output
 COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 80
